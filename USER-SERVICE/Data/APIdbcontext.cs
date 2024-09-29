@@ -12,6 +12,7 @@ namespace USER_SERVICE.Data
     {
         public APIdbcontext(DbContextOptions<APIdbcontext> options) : base(options) { }
 
+        public DbSet<User> Users {get; set;}
         public DbSet<Estudiante> Estudiantes { get; set; }
         public DbSet<Docente> Docentes {get; set;}
     }
