@@ -8,6 +8,7 @@ using USER_SERVICE.DTOs;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 namespace USER_SERVICE.Controllers
 {
@@ -52,32 +53,6 @@ namespace USER_SERVICE.Controllers
             }
         }
 
-        [HttpPost("login")]
-        public async Task<ActionResult<string>> Login(DocenteLoginDto dto)
-        {
-            try
-            {
-                var user = await _userService.Login(dto);
-
-                // Generate JWT Token
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Secret"]);
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = new ClaimsIdentity(new[] { new Claim("id", user.UUID) }),
-                    Expires = DateTime.UtcNow.AddDays(7),
-                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-                };
-                var token = tokenHandler.CreateToken(tokenDescriptor);
-                var tokenString = tokenHandler.WriteToken(token);
-
-                return Ok(tokenString);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
 
         [HttpGet("{UUID}")]
         public async Task<ActionResult<User>> GetUser(string UUID)
@@ -87,10 +62,40 @@ namespace USER_SERVICE.Controllers
             return Ok(user);
         }
 
-        [HttpPut("List")]
-        public async Task<ActionResult<User>> GetList()
+        [HttpGet("Lista de estudiantes")]
+        public async Task<ActionResult<User>> GetoceList()
         {
-            return Ok();
+            var user = await _userService.GetEstudiantesAsync();
+            if (user == null) return NotFound();
+            return Ok(user);
+        }
+
+        [HttpGet("Lista de docentes")]
+        public async Task<ActionResult<User>> GetDocenteList()
+        {
+            var user = await _userService.GetDocentesAsync();
+            if (user == null) return NotFound();
+            return Ok(user);
+        }
+
+        [HttpPut("Edit Student")]
+        [Authorize(Policy ="AdminOnly")]
+        public async Task<ActionResult<Estudiante>> EditarEstudiante(EstudianteDto dto, string UUID)
+        {
+            var user= await _userService.GetEstudiantebyGUID(UUID);
+            if(user==null) return NotFound();
+            await _userService.EditStudent(dto,UUID);
+            return Ok(user);
+        }
+
+        [HttpPut("Edit Docente")]
+        [Authorize(Policy ="AdminOnly")]
+        public async Task<ActionResult<Estudiante>> EditarDocente(DocenteDto dto, string UUID)
+        {
+            var user= await _userService.GetDocentebyGUID(UUID);
+            if(user==null) return NotFound();
+            await _userService.EditDocente(dto,UUID);
+            return Ok(user);
         }
     }
 }

@@ -74,7 +74,64 @@ namespace USER_SERVICE.Services
         
         public async Task<User> GetUserbyGUID(string UUID)
         {
-            return await _context.Estudiantes.FindAsync(UUID);
+            if(await _context.Users.FindAsync(UUID)== null)
+            {
+                throw new Exception("Usuario inexistente");
+            }
+            var user = await _context.Users.FindAsync(UUID);
+            return user;
+        }
+        public async Task<User> GetEstudiantebyGUID(string UUID)
+        {
+            if(await _context.Estudiantes.FindAsync(UUID)== null)
+            {
+                throw new Exception("Usuario inexistente");
+            }
+            var user = await _context.Estudiantes.FindAsync(UUID);
+            return user;
+        }
+        public async Task<User> GetDocentebyGUID(string UUID)
+        {
+            if(await _context.Docentes.FindAsync(UUID)== null)
+            {
+                throw new Exception("Usuario inexistente");
+            }
+            var user = await _context.Docentes.FindAsync(UUID);
+            return user;
+        }
+
+        public async Task<List<Estudiante>> GetEstudiantesAsync()
+        {
+            return await _context.Estudiantes.ToListAsync();
+        }
+
+        public async Task<List<Docente>> GetDocentesAsync()
+        {
+            return await _context.Docentes.ToListAsync();
+        }
+
+        public async Task EditStudent(EstudianteDto dto, string UUID)
+        {
+            var estudiante = await _context.Estudiantes.FindAsync(UUID);
+            if(estudiante != null)
+            {
+                estudiante.Nombre=dto.Nombre;
+                estudiante.Email=dto.Email;
+
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task EditDocente(DocenteDto dto, string UUID)
+        {
+            var docente = await _context.Estudiantes.FindAsync(UUID);
+            if(docente != null)
+            {
+                docente.Nombre=dto.Nombre;
+                docente.Email=dto.Email;
+
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }
